@@ -1,0 +1,21 @@
+private void newResultString(String st)
+private void stringDelNum()
+
+
+private void addNumber(String st)
+private void addOperation(String st)
+private void addSqrt()
+private void addBracket()
+private void addPoint()
+private void addSignBeforeNumber()
+
+private boolean isLastCharacterOperator()
+private boolean isLastCharacterSqrt()
+private boolean isLastCharacterBracket1()
+private boolean isLastCharacterBracket2()
+private boolean isLastCharacterNumber()
+
+private boolean isMoreOnePoint()
+
+private int countCharacters(char ch) // метод возвращает колличество символов ch (приходящих в качестве параметра) в строке stringInput
+private String lastNumber() // метод возвращает строку - последнее число из строки stringInput
