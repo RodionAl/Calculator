@@ -17,5 +17,8 @@ private boolean isLastCharacterNumber()
 
 private boolean isMoreOnePoint()
 
+private void printLineOnDisplay()
+
 private int countCharacters(char ch) // метод возвращает колличество символов ch (приходящих в качестве параметра) в строке stringInput
 private String lastNumber() // метод возвращает строку - последнее число из строки stringInput
+private ArrayList<Integer> arrayIndexAllOperator()

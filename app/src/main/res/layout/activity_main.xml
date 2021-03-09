@@ -22,15 +22,24 @@
             android:layout_weight="40"
             android:orientation="horizontal">
 
+            <ScrollView
+                android:id="@+id/scrollView1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fillViewport="true">
+
             <TextView
                 android:id="@+id/textView_line_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/white"
                 android:gravity="top"
-                android:textSize="40dp"
+                android:textSize="40sp"
                 android:paddingLeft="25dp"
+                android:paddingBottom="15dp"
                 android:layout_marginTop="20dp"/>
+            </ScrollView>
+
         </LinearLayout>
 
         <LinearLayout

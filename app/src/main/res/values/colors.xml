@@ -6,5 +6,5 @@
     <color name="backGround">@color/colorPrimaryDark</color>
     <color name="text_window">#fff</color>
     <color name="white">#fff</color>
-    <color name="colorSimbols">#673AB7</color>
+    <color name="colorSimbols">#8D54F1</color>
 </resources>
