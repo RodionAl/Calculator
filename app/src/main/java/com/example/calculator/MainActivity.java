@@ -12,6 +12,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import static com.example.calculator.R.*;
@@ -23,10 +24,12 @@ public class MainActivity extends AppCompatActivity {
     private final String multiply = "×";
     private final String div = "÷";
     private final String colorOperator = "#8D54F1";
+    private String mainResult = "";  // строка итогового результата.
 
     private long backPrassedTime;
 
     private TextView textView_line_input; // для вывода и отображения вводимой пользователем информации
+    private TextView textView_line_preview;  // для вывода и отображения предварительного результата;
     private ScrollView scrollView;
 
     private Toast toastLimit;
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(layout.activity_main);
 
         textView_line_input = (TextView) findViewById(id.textView_line_input);
+        textView_line_preview = (TextView)findViewById(id.textView2);
         scrollView = (ScrollView) findViewById(id.scrollView1);
 
 
@@ -603,6 +607,7 @@ public class MainActivity extends AppCompatActivity {
         textView_line_input.setText(text, TextView.BufferType.SPANNABLE);
 //        scrollView.fullScroll(View.FOCUS_DOWN);
         scrollView.pageScroll(View.FOCUS_DOWN);   // для автоматической прокрутке во время ввода строки
+        startCounting(); // считаем строку
     }
 
     // метод возвращает список состоящий из чисел, которые являются порядковыми индексами элементов в строке stringInput
@@ -625,4 +630,170 @@ public class MainActivity extends AppCompatActivity {
 
         return list;
     }
+
+    // здесь будет вся логика управления вычислениями, будут последовательно вызываться разные методы считающие результат
+    private void startCounting(){
+        String res = "";
+        double a;
+        DecimalFormat dF = new DecimalFormat( "###.###" );
+        if(isLastCharacterNumber()|| isLastCharacterBracket2()){
+            res = countStringBase(stringInput);
+            if(res.length()<15){
+                a = Double.parseDouble(res);
+                mainResult = dF.format(a);
+                textView_line_preview.setTextSize(25);
+            }else {
+                mainResult = res;
+                textView_line_preview.setTextSize(20);
+            }
+           
+            textView_line_preview.setText(mainResult);
+        }
+        if(isLastCharacterOperator()||isLastCharacterBracket1()||isLastCharacterSqrt()){
+            textView_line_preview.setText("");
+        }
+        if(stringInput.length()<1){
+            textView_line_preview.setTextSize(25);
+            textView_line_preview.setText(stringInput);
+        }
+    }
+
+
+    // метод вычисляет значение полученной строки и возвращает ответ в строковом значении.
+    // выполняются только операции умножения, деления, сложения и вычитания.
+    // порядок действий не определяется скобками.
+    private String countStringBase(String st){
+        ArrayList<String> list = parseSring(st);
+        boolean isExit = false;
+        while (!isExit){   // сначала выполняем все операции умножения и деления
+            if(list.contains(multiply) && list.contains(div)){  // пример 6*35:15*2
+                int idiv = list.indexOf(div);
+                int imul = list.indexOf(multiply);
+                if(idiv < imul){
+                    double a = Double.parseDouble(list.get(idiv-1));
+                    double b = Double.parseDouble(list.get(idiv+1));
+                    if(b != 0) {
+                        double c = div(a, b);
+                        String res = "" + c;
+                        list.remove(idiv+1);
+                        list.remove(idiv);
+                        list.remove(idiv-1);
+                        list.add(idiv-1, res);
+                    }else{
+                        list.removeAll(list);
+                        isExit = true;
+                        list.add("");
+                    }
+                }else {
+                    double a = Double.parseDouble(list.get(imul-1));
+                    double b = Double.parseDouble(list.get(imul+1));
+                    double c = mult(a, b);
+                    String res = "" + c;
+                    list.remove(imul+1);
+                    list.remove(imul);
+                    list.remove(imul-1);
+                    list.add(imul-1, res);
+                }
+            }else if(list.contains(multiply)){
+                int imul = list.indexOf(multiply);
+                double a = Double.parseDouble(list.get(imul-1));
+                double b = Double.parseDouble(list.get(imul+1));
+                double c = mult(a, b);
+                String res = "" + c;
+                list.remove(imul+1);
+                list.remove(imul);
+                list.remove(imul-1);
+                list.add(imul-1, res);
+            }else if(list.contains(div)){
+                int idiv = list.indexOf(div);
+                double a = Double.parseDouble(list.get(idiv-1));
+                double b = Double.parseDouble(list.get(idiv+1));
+                if(b != 0) {
+                    double c = div(a, b);
+                    String res = "" + c;
+                    list.remove(idiv+1);
+                    list.remove(idiv);
+                    list.remove(idiv-1);
+                    list.add(idiv-1, res);
+                }else{
+                    list.removeAll(list);
+                    isExit = true;
+                    list.add("");
+                }
+            }else {
+                isExit = true;
+            }
+
+            if(list.size() <= 1){
+                isExit = true;
+            }
+        }
+        isExit = false;
+        while (!isExit){  // здесь выполняем операции сложения и вычитания.
+            if(list.contains("+")){
+                int i = list.indexOf("+");
+                double a = Double.parseDouble(list.get(i-1));
+                double b = Double.parseDouble(list.get(i+1));
+                double c = sum(a, b);
+                String res = "" + c;
+                list.remove(i+1);
+                list.remove(i);
+                list.remove(i-1);
+                list.add(i-1, res);
+            }else if(list.contains("-")){
+                int i = list.indexOf("-");
+                double a = Double.parseDouble(list.get(i-1));
+                double b = Double.parseDouble(list.get(i+1));
+                double c = min(a, b);
+                String res = "" + c;
+                list.remove(i+1);
+                list.remove(i);
+                list.remove(i-1);
+                list.add(i-1, res);
+            }else {
+                isExit = true;
+            }
+
+            if(list.size() <= 1){
+                isExit = true;
+            }
+        }
+        String res = list.get(0);
+        return res;
+    }
+
+    // разбиваем введеную строку на список чисел и операций (без корня)
+    private ArrayList<String> parseSring(String st){
+        ArrayList<String> list = new ArrayList<>();
+        char [] ch = st.toCharArray();
+        String s = "";
+        char multiplyCh = multiply.charAt(0);
+        char divCh = div.charAt(0);
+
+        for(int i = 0; i < ch.length; i++){
+            if((ch[i] >= '0' && ch[i] <= '9')){ // если символ число, то наращиваем строку
+                s = s + ch[i];
+            }else if (ch[i] == '-'){            // если символ минус, то проверяем это оператор минус или знак числа
+                if(s.length() < 1) {            // если строка пустая, то значит это знак числа и просто начинаем наращивать строку
+                    s = s + ch[i];
+                }else{                          // если строка не пустая, то это не может быть знак, значит это оператор
+                    list.add(s);                // добавляем то что было в список
+                    s = "" + ch[i];             // присваеваем строке оператор минус
+                    list.add(s);                // добавляем с список
+                    s = "";                     // обновляем строку
+                }
+            }else if(ch[i] == '+' || ch[i] == multiplyCh || ch[i] == divCh){   // если символ один из: "+", "×", "÷"
+                list.add(s);                // добавляем то что было в список
+                s = "" + ch[i];             // присваеваем строке оператор минус
+                list.add(s);                // добавляем с список
+                s = "";                     // обновляем строку
+            }
+        }
+        if(s != ""){           //если последний символ в строке был числом (или знаком скобки), то последнее число не было добавлено в список
+            list.add(s);       // добавляем его
+            s = "";
+        }
+        return list;
+    }
+
 }

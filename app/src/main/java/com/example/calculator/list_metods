@@ -1,6 +1,6 @@
+----------------------------- ввод:
 private void newResultString(String st)
 private void stringDelNum()
-
 
 private void addNumber(String st)
 private void addOperation(String st)
@@ -17,8 +17,14 @@ private boolean isLastCharacterNumber()
 
 private boolean isMoreOnePoint()
 
+------------------------------- вывод:
 private void printLineOnDisplay()
 
 private int countCharacters(char ch) // метод возвращает колличество символов ch (приходящих в качестве параметра) в строке stringInput
 private String lastNumber() // метод возвращает строку - последнее число из строки stringInput
 private ArrayList<Integer> arrayIndexAllOperator()
+
+----------------------- логика вычислений:
+private void startCounting()
+private ArrayList<String> parseSring(String st)
+private String countStringBase(String st)
