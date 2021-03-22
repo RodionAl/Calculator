@@ -1,9 +1,11 @@
 package com.example.calculator;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
@@ -19,6 +21,7 @@ import static com.example.calculator.R.*;
 
 public class MainActivity extends AppCompatActivity {
     private String stringInput = ""; // строка вводимая пользователем
+    private static final String STRINGINPUT_RESULTS = "strInput";
 
     private final String sqr = "√";
     private final String multiply = "×";
@@ -44,6 +47,11 @@ public class MainActivity extends AppCompatActivity {
         textView_line_preview = (TextView)findViewById(id.textView2);
         scrollView = (ScrollView) findViewById(id.scrollView1);
 
+
+        if(savedInstanceState != null){
+            stringInput = savedInstanceState.getString(STRINGINPUT_RESULTS);
+            printLineOnDisplay();
+        }
 
         ImageView img_one = (ImageView) findViewById(id.number_one);
         img_one.setOnClickListener(new View.OnClickListener() {
@@ -228,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // добавляем скобки корень
+        // добавляем корень
         ImageView square_root = (ImageView) findViewById(id.square_root);
         square_root.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -239,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // добавляем скобки корень
+        // добавляем/убираем знак минус перед числом
         ImageView sign = (ImageView) findViewById(id.sign);
         sign.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -251,6 +259,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(STRINGINPUT_RESULTS, stringInput);
+    }
 
     private double sum(double a, double b){
         return a + b;
@@ -330,13 +343,18 @@ public class MainActivity extends AppCompatActivity {
                 }
                 a = stringInput.length();
                 try {
-                    char a1 = stringInput.charAt(a - 1);
-                    char a2 = stringInput.charAt(a - 2);
-                    if (a1 == 45 && a2 == 40) {                   // 45 == "-" 40 == "("
-                        stringDelNum();         // т.е. если последние символы были "(-", то просто удаляем их.
-                        stringDelNum();
-                        newResultString(lastNumber);
-                    } else {
+                    if(a > 1) {
+                        char a1 = stringInput.charAt(a - 1);
+                        char a2 = stringInput.charAt(a - 2);
+                        if (a1 == 45 && a2 == 40) {                   // 45 == "-" 40 == "("
+                            stringDelNum();         // т.е. если последние символы были "(-", то просто удаляем их.
+                            stringDelNum();
+                            newResultString(lastNumber);
+                        } else {
+                            newResultString("(-" + lastNumber);
+                        }
+                    }
+                    if(a == 1){
                         newResultString("(-" + lastNumber);
                     }
                 }catch (Exception e){}
@@ -390,13 +408,13 @@ public class MainActivity extends AppCompatActivity {
         if(a == 0 || isLastCharacterOperator()|| isLastCharacterBracket1()|| isLastCharacterSqrt()){  // если не было символов или последний символ оператор или последний символ "("или последний символ корень
             newResultString("(");
         }else if(isLastCharacterNumber()){
-            if((countCharacters(b1) - countCharacters(b2)) == 0){   // если скобок не было или количество открывающих == количеству закрывающих
+            if((countCharacters(stringInput, b1) - countCharacters(stringInput, b2)) == 0){   // если скобок не было или количество открывающих == количеству закрывающих
                 newResultString(multiply + "(");
-            }else if(countCharacters(b1) > countCharacters(b2)){
+            }else if(countCharacters(stringInput, b1) > countCharacters(stringInput, b2)){
                 newResultString(")");                               // если открывающих больше чем закрывающих и последняя цифра
             }
         }else if(isLastCharacterBracket2()){
-            if(countCharacters(b1) > countCharacters(b2)){
+            if(countCharacters(stringInput, b1) > countCharacters(stringInput, b2)){
                 newResultString(")");
             }
         }
@@ -557,10 +575,10 @@ public class MainActivity extends AppCompatActivity {
         return res;
     }
 
-    // метод возвращает колличество символов ch (приходящих в качестве параметра) в строке stringInput
-    private int countCharacters(char ch){
+    // метод возвращает колличество символов ch (приходящих в качестве параметра) в строке str
+    private int countCharacters(String str, char ch){
         int res = 0;
-        char [] chars = stringInput.toCharArray();
+        char [] chars = str.toCharArray();
         int a = chars.length;
         for(int i = 0; i < a; i++){
             if(chars[i] == ch){
@@ -637,7 +655,11 @@ public class MainActivity extends AppCompatActivity {
         double a;
         DecimalFormat dF = new DecimalFormat( "###.###" );
         if(isLastCharacterNumber()|| isLastCharacterBracket2()){
-            res = countStringBase(stringInput);
+            if(stringInput.contains("(")){
+                res = countForStringWithBracket(stringInput);
+            }else {
+                res = countStringBase(stringInput);
+            }
             if(res.length()<15){
                 a = Double.parseDouble(res);
                 mainResult = dF.format(a);
@@ -658,6 +680,79 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // в метод приходит любая строка не содержащая корня, возвращает строку, которая
+    // является результатом вычисления данной строки.
+
+    private String countForStringWithBracket(String st){
+        String resSt = st;
+        int numberBracketsOne = countCharacters(st, '(');  // считаем сколько в строке открывающих скобок
+        int numberBracketsTwo = countCharacters(st, ')');  // считаем сколько в строке закрывающих скобок
+        if(numberBracketsOne > numberBracketsTwo){             // если количество откр и закр скобок не совпадает, то добавляем в конце строки закр скобки
+            int a0 = numberBracketsOne - numberBracketsTwo;
+            for(int i = 0; i< a0; i++){
+                resSt = resSt + ")";
+            }
+            numberBracketsTwo = numberBracketsOne;
+        }
+        boolean isExit = false;
+        int indEnd =   indEnd = resSt.indexOf(")");  // находим первую закрывающую скобку
+        int indBegin = 0;
+        while (!isExit){
+
+            // ищем последнюю открывающую скобку индекс которой меньше ind
+            String st0 = resSt.substring(0, indEnd);
+            indBegin = st0.lastIndexOf("(");
+            boolean isExitTwo = false;
+            while (!isExitTwo) {
+                if (indEnd - indBegin - 2 > 0) {  // если не выполняется, то между скобками один символ, очевидно число
+                    String stMid = resSt.substring(indBegin + 2, indEnd); // найденная строка между скобками
+                    if (stMid.contains("+") || stMid.contains("-") || stMid.contains(multiply) || stMid.contains(div)) {
+                        isExitTwo = true;
+                    } else {  // если между скобками было просто отрицательное число, то мы рассматриваем следующую пару скобок
+                        indEnd = resSt.indexOf(")", indEnd + 1);
+                        indBegin = st0.lastIndexOf("(", indBegin - 1);
+                        if(indBegin < 0 && indEnd > 0){
+                            st0 = resSt.substring(0, indEnd);
+                            indBegin = st0.lastIndexOf("(");
+                        }
+                    }
+                    if(indBegin <= 0){
+                        isExitTwo = true;
+                    }
+                }else {
+                    isExitTwo = true;
+                }
+            }
+            if(indEnd >= 0) {
+            resSt = countBetweenBrackets(resSt, indBegin, indEnd); // получаем новую строку в которой найденная скобка посчитана и вставленно число на место скобки
+            }else{
+                resSt = countStringBase(resSt);
+            }
+            indEnd = resSt.indexOf(")");  // находим снова первую скобку
+            if(indEnd < 0){  // если ее нет, выходим из цикла
+                isExit = true;
+            }
+        }
+//        resSt = countStringBase(resSt);
+        return  countStringBase(resSt);
+    }
+
+    // в метод приходит строка и индексы а и b для открывающей и закрыв скобки
+    // необходимо посчитать строку между а и b, вырезать из пришедшей строки кусок со скобками
+    // поставив вместо него полученный результат
+    private String countBetweenBrackets(String st, int a, int b){
+        String strBegin = st.substring(0, a);   // копируем часть строки до открывающей скобки
+        String strMiddle = st.substring(a+1, b);  // копируем часть строки между открывающей скобкой и закрывающей
+        String strEnd = st.substring(b+1);   // копируем часть строки после закрывающей скобки
+        String strNewMiddle = countStringBase(strMiddle);  // сткроку которая была в скобках отправляем в метод и считаем
+        char ch = strNewMiddle.charAt(0);
+        if(ch == '-'&& strBegin.length()>0){
+            String st0 = "(" + strNewMiddle + ")";
+            strNewMiddle = st0;
+        }
+        String result = strBegin + strNewMiddle + strEnd;
+        return result;
+    }
 
     // метод вычисляет значение полученной строки и возвращает ответ в строковом значении.
     // выполняются только операции умножения, деления, сложения и вычитания.
@@ -771,7 +866,7 @@ public class MainActivity extends AppCompatActivity {
         char divCh = div.charAt(0);
 
         for(int i = 0; i < ch.length; i++){
-            if((ch[i] >= '0' && ch[i] <= '9')){ // если символ число, то наращиваем строку
+            if((ch[i] >= '0' && ch[i] <= '9')|| ch[i] == '.'){ // если символ число, то наращиваем строку
                 s = s + ch[i];
             }else if (ch[i] == '-'){            // если символ минус, то проверяем это оператор минус или знак числа
                 if(s.length() < 1) {            // если строка пустая, то значит это знак числа и просто начинаем наращивать строку

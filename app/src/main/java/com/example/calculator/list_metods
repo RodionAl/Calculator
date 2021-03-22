@@ -20,7 +20,7 @@ private boolean isMoreOnePoint()
 ------------------------------- вывод:
 private void printLineOnDisplay()
 
-private int countCharacters(char ch) // метод возвращает колличество символов ch (приходящих в качестве параметра) в строке stringInput
+private int countCharacters(String str, char ch) // метод возвращает колличество символов ch (приходящих в качестве параметра) в строке str
 private String lastNumber() // метод возвращает строку - последнее число из строки stringInput
 private ArrayList<Integer> arrayIndexAllOperator()
 
@@ -28,3 +28,8 @@ private ArrayList<Integer> arrayIndexAllOperator()
 private void startCounting()
 private ArrayList<String> parseSring(String st)
 private String countStringBase(String st)
+private String countForStringWithBracket(String st)
+private String countBetweenBrackets(String st, int a, int b)
+
+-----------------------
+public void onSaveInstanceState(Bundle outState)
