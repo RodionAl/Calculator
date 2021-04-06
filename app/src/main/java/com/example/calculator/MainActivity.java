@@ -1,11 +1,7 @@
 package com.example.calculator;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
@@ -13,6 +9,8 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -651,14 +649,17 @@ public class MainActivity extends AppCompatActivity {
 
     // здесь будет вся логика управления вычислениями, будут последовательно вызываться разные методы считающие результат
     private void startCounting(){
-        String res = "";
+        String res = stringInput;
         double a;
         DecimalFormat dF = new DecimalFormat( "###.###" );
         if(isLastCharacterNumber()|| isLastCharacterBracket2()){
-            if(stringInput.contains("(")){
-                res = countForStringWithBracket(stringInput);
+           while (res.contains(sqr)){
+               res = countStringWithSqrt(res);
+           }
+            if(res.contains("(")){
+                res = countForStringWithBracket(res);
             }else {
-                res = countStringBase(stringInput);
+                res = countStringBase(res);
             }
             if(res.length()<15){
                 a = Double.parseDouble(res);
@@ -680,9 +681,91 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    // в метод приходит строка содержащая корень. Метод находит первый корень, выделяет часть находящуюся под этим корнем, считает ее
+    // и возвращает новую строку, подобную изначальной, только вместо корня число - результат вычислений.
+    // если найденная строка (находящаяся под корнем) содержить еще один (вложенный) корень, то ее отвравляем в этот же метод.
+    private String countStringWithSqrt(String st) {
+        String result = "";  // строка которая будет результатом
+        String resSt = st;
+        String strMiddle = "";  // строка находящаяся под корнем
+        int indexSqr = resSt.indexOf(sqr);  // индекс для первого знака корня
+        boolean isExit = false;
+        int b1 = 0;                          // счетчик скобок в строке содержащей корень
+        char charPostSqr = resSt.charAt(indexSqr + 1);   // символ стоящий после корня
+        int indexEnd = indexSqr + 1;                     // индекс для последнего символа в строке под корнем
+        String strEnd = "";
+        if (charPostSqr == '(') {  // после корня идет открывающая скобка
+
+            while (!isExit) {
+                if (resSt.charAt(indexEnd) == '(') {
+                    b1++;
+                }
+                if (resSt.charAt(indexEnd) == ')') {
+                    b1--;
+                }
+                if(b1 == 0){
+                    isExit = true;
+                    break;
+                }
+                if (indexEnd + 1 >= resSt.length()) {
+                    isExit = true;
+                }
+                indexEnd++;
+            }
+            strMiddle = st.substring(indexSqr + 1, indexEnd);    // выделяем строку находящуюся под корнем
+            if(strMiddle.contains(sqr)){                         // если данная строка тоже содержит корень, то отправляем ее рекурсивно в этот метод
+                strMiddle = countStringWithSqrt(strMiddle);
+            }
+
+            if(strMiddle.contains("(")||strMiddle.contains(")")||strMiddle.contains(multiply)||strMiddle.contains(div)||strMiddle.contains("+")||strMiddle.contains("-")) {
+                strMiddle = countForStringWithBracket(strMiddle);   // если строка содержит операторы (не является просто числом), считаем ее
+            }
+            strMiddle = getSqr(strMiddle);   // извлекаем непосредственно корень
+            if(indexEnd < resSt.length()-1){   // если была строка после корня
+                strEnd = st.substring(indexEnd + 1);
+            }
+        } else {          // после корня идет число
+            while (!isExit) {
+                if (resSt.charAt(indexEnd) >= '0' && resSt.charAt(indexEnd) <= '9') {
+                    indexEnd++;
+                }else{
+                    isExit = true;
+                }
+
+                if ((indexEnd >= resSt.length())) {
+                    isExit = true;
+                }
+
+            }
+            strMiddle = st.substring(indexSqr + 1, indexEnd);
+            strMiddle = getSqr(strMiddle);
+            if(indexEnd < resSt.length()-1){   // если была строка после корня
+                strEnd = st.substring(indexEnd);
+            }
+        }
+        String strBegin = "";
+        if(indexSqr > 0){   // если была строка до корня
+            strBegin = st.substring(0, indexSqr);
+        }
+
+
+
+        result = strBegin + strMiddle + strEnd;
+
+        return result;
+    }
+
+    //метод считает квадратный корень из числа, приходящего ввиде строки. Возвращает результат тоже в виде строки.
+    private String getSqr(String st){
+        Double a = Double.parseDouble(st);
+        a = Math.sqrt(a);
+        String res = a.toString();
+        return res;
+    }
+
     // в метод приходит любая строка не содержащая корня, возвращает строку, которая
     // является результатом вычисления данной строки.
-
     private String countForStringWithBracket(String st){
         String resSt = st;
         int numberBracketsOne = countCharacters(st, '(');  // считаем сколько в строке открывающих скобок
@@ -825,21 +908,21 @@ public class MainActivity extends AppCompatActivity {
         }
         isExit = false;
         while (!isExit){  // здесь выполняем операции сложения и вычитания.
-            if(list.contains("+")){
-                int i = list.indexOf("+");
+            if(list.contains("-")){
+                int i = list.indexOf("-");
                 double a = Double.parseDouble(list.get(i-1));
                 double b = Double.parseDouble(list.get(i+1));
-                double c = sum(a, b);
+                double c = min(a, b);
                 String res = "" + c;
                 list.remove(i+1);
                 list.remove(i);
                 list.remove(i-1);
                 list.add(i-1, res);
-            }else if(list.contains("-")){
-                int i = list.indexOf("-");
+            }else if(list.contains("+")){
+                int i = list.indexOf("+");
                 double a = Double.parseDouble(list.get(i-1));
                 double b = Double.parseDouble(list.get(i+1));
-                double c = min(a, b);
+                double c = sum(a, b);
                 String res = "" + c;
                 list.remove(i+1);
                 list.remove(i);
@@ -890,5 +973,4 @@ public class MainActivity extends AppCompatActivity {
         }
         return list;
     }
-
 }
