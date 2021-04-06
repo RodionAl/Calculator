@@ -255,6 +255,18 @@ public class MainActivity extends AppCompatActivity {
                 }catch (Exception e){ }
             }
         });
+
+        // реализуем нажатие на кнопку равно
+        ImageView equally = (ImageView) findViewById(id.equally);
+        equally.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                textView_line_input.setText(mainResult);
+                stringInput = mainResult;
+                mainResult = "";
+                textView_line_preview.setText("");
+            }
+        });
     }
 
     @Override
@@ -264,19 +276,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private double sum(double a, double b){
-        return a + b;
+        DecimalFormat dF = new DecimalFormat( "###.###" );
+        double res = a + b;
+        String st = dF.format(res);
+        return Double.parseDouble(st);
     }
 
     private double min(double a, double b){
-        return a - b;
+        DecimalFormat dF = new DecimalFormat( "###.###" );
+        double res = a - b;
+        String st = dF.format(res);
+        return Double.parseDouble(st);
     }
 
     private double div(double a, double b){
-        return a/b;
+        DecimalFormat dF = new DecimalFormat( "###.###" );
+        double res = a/b;
+        String st = dF.format(res);
+        return Double.parseDouble(st);
     }
 
     private  double mult(double a, double b){
-        return a*b;
+        DecimalFormat dF = new DecimalFormat( "###.###" );
+        double res = a * b;
+        String st = dF.format(res);
+        return Double.parseDouble(st);
     }
 
     // метод добавляет символ к вводимой пользователем строке из цифр и операторов
@@ -661,15 +685,15 @@ public class MainActivity extends AppCompatActivity {
             }else {
                 res = countStringBase(res);
             }
+
             if(res.length()<15){
-                a = Double.parseDouble(res);
-                mainResult = dF.format(a);
                 textView_line_preview.setTextSize(25);
             }else {
-                mainResult = res;
                 textView_line_preview.setTextSize(20);
             }
-           
+            a = Double.parseDouble(res);
+            mainResult = dF.format(a);
+
             textView_line_preview.setText(mainResult);
         }
         if(isLastCharacterOperator()||isLastCharacterBracket1()||isLastCharacterSqrt()){
