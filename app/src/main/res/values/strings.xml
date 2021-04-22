@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">Calculator</string>
     <string name="number_limit">Can\'t enter more than 15 digits.</string>
+    <string name="number_limit_fractional_part">Can\'t enter more than 10 digits after decimal point.</string>
     <string name="exit">Please press button again to exit</string>
+    <string name="divide_by_zero">Can\'t divide by zero.</string>
     <string name="sign_name">+/-</string>
     <string name="number_one">1</string>
     <string name="number_two">2</string>

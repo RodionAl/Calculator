@@ -25,13 +25,13 @@ private String lastNumber() // метод возвращает строку - п
 private ArrayList<Integer> arrayIndexAllOperator()
 
 ----------------------- логика вычислений:
-private void startCounting()
-private ArrayList<String> parseSring(String st)
-private String countStringBase(String st)
-private String countForStringWithBracket(String st)
-private String countBetweenBrackets(String st, int a, int b)
-private String getSqr(String st)
-private String countStringWithSqrt(String st)
+private void startCounting() +
+private ArrayList<String> parseSring(String st)+
+private String countStringBase(String st)+
+private String countForStringWithBracket(String st)+
+private String countBetweenBrackets(String st, int a, int b)+
+private String getSqr(String st)+
+private String countStringWithSqrt(String st)+
 
 -----------------------
 public void onSaveInstanceState(Bundle outState)
