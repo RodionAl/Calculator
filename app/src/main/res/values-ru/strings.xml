@@ -4,6 +4,7 @@
     <string name="number_limit_fractional_part">Дробная часть не должна превышать 10 символов.</string>
     <string name="exit">Пожалуйста нажмите кнопку "Назад" еще раз чтобы выйти</string>
     <string name="divide_by_zero">Деление на ноль невозможно.</string>
+    <string name="undefined_result">Невозможно показать неопределенный результат.</string>
     <string name="sign_name">+/-</string>
     <string name="number_one">1</string>
     <string name="number_two">2</string>

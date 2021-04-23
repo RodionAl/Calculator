@@ -21,6 +21,12 @@ public class CalculatorTest {
     }
 
     @Test
+    public void getSqrNegative(){
+        String result = mCalculator.getSqr("-9");
+        assertThat(result, is(equalTo("NaN")));
+    }
+
+    @Test
     public void addTwoNumbers(){
         double resultAdd = mCalculator.add(1d, 1d);
         assertThat(resultAdd, is(equalTo(2d)));
@@ -275,5 +281,26 @@ public class CalculatorTest {
         String result = mCalculator.mainResult;
         assertThat(result, is(equalTo("7")));
     }
+
+    @Test
+    public void countStringWithSqrt9(){
+        mCalculator.stringInput = "√(4-5)";
+        mCalculator.startCounting();
+        String result = mCalculator.mainResult;
+        assertThat(result, is(equalTo("NaN")));
+    }
+
+    @Test
+    public void countStringWithSqrt10(){
+        String result = mCalculator.countStringWithSqrt("√(4-5)");
+        assertThat(result, is(equalTo("NaN")));
+    }
+
+    @Test
+    public void countStringWithSqrt11(){
+        String result = mCalculator.countStringWithSqrt("√(-5)");
+        assertThat(result, is(equalTo("NaN")));
+    }
+
 
 }

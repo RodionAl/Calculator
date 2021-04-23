@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private Toast toastLimit;
     private Toast toastDivideByZero;
     private Toast backToast;
+    private Toast toastUndefinedResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -269,6 +270,10 @@ public class MainActivity extends AppCompatActivity {
                     toastDivideByZero = Toast.makeText(getBaseContext(), string.divide_by_zero,
                             Toast.LENGTH_SHORT);
                     toastDivideByZero.show();
+                }else if(mainResult.equals("NaN")){
+                    toastUndefinedResult = Toast.makeText(getBaseContext(), string.undefined_result,
+                            Toast.LENGTH_SHORT);
+                    toastUndefinedResult.show();
                 }else {
                     textView_line_input.setText(mainResult);
                     stringInput = mainResult;
@@ -676,7 +681,7 @@ public class MainActivity extends AppCompatActivity {
                 textView_line_preview.setTextSize(20);
             }
 
-            if(mainResult.equals("INFINITY")) {
+            if(mainResult.equals("INFINITY")||mainResult.equals("NaN")) {
                 textView_line_preview.setText("");
             }else{
                 textView_line_preview.setText(mainResult);

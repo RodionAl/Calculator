@@ -20,17 +20,19 @@ public class Calculator {
             while (res.contains(SQR)) {
                 res = countStringWithSqrt(res);
             }
-            if (res.contains("(")) {
-                res = countForStringWithBracket(res);
-            } else {
-                res = countStringBase(res);
+            if(!(res.equals("INFINITY") || res.equals("NaN"))) {
+                if (res.contains("(")) {
+                    res = countForStringWithBracket(res);
+                } else {
+                    res = countStringBase(res);
+                }
             }
 
-            if(res != "INFINITY") {
+            if(res.equals("INFINITY") || res.equals("NaN")) {
+                mainResult = res;
+            }else {
                 a = Double.parseDouble(res);
                 mainResult = dF.format(a);
-            }else {
-                mainResult = res;
             }
         }
     }
@@ -113,7 +115,7 @@ public class Calculator {
      и возвращает новую строку, подобную изначальной, только вместо корня число - результат вычислений.
      если найденная строка (находящаяся под корнем) содержить еще один (вложенный) корень, то ее отвравляем в этот же метод.
      */
-    private String countStringWithSqrt(String st) {
+    String countStringWithSqrt(String st) {
         String result = "";  // строка которая будет результатом
         String resSt = st;
         String strMiddle = "";  // строка находящаяся под корнем
@@ -150,6 +152,13 @@ public class Calculator {
                 strMiddle = countForStringWithBracket(strMiddle);   // если строка содержит операторы (не является просто числом), считаем ее
             }
             strMiddle = getSqr(strMiddle);   // извлекаем непосредственно корень
+
+            if(strMiddle.equals("NaN")){
+                stringInput = "";
+                mainResult = "NaN";
+                return "NaN";
+            }
+
             if(indexEnd < resSt.length()-1){   // если была строка после корня
                 strEnd = st.substring(indexEnd + 1);
             }
@@ -168,6 +177,7 @@ public class Calculator {
             }
             strMiddle = st.substring(indexSqr + 1, indexEnd);
             strMiddle = getSqr(strMiddle);
+
             if(indexEnd < resSt.length()-1){   // если была строка после корня
                 strEnd = st.substring(indexEnd);
             }
@@ -185,11 +195,15 @@ public class Calculator {
     /**
      * метод считает квадратный корень из числа, приходящего ввиде строки. Возвращает результат тоже в виде строки.
      */
-    private String getSqr(String st){
-        Double a = Double.parseDouble(st);
-        a = Math.sqrt(a);
-        String res = a.toString();
-        return res;
+    String getSqr(String st){
+        try {
+            Double a = Double.parseDouble(st);
+            a = Math.sqrt(a);
+            String res = a.toString();
+            return res;
+        } catch (Exception e) {
+            return "NaN";
+        }
     }
 
     /** метод вычисляет значение полученной строки и возвращает ответ в строковом значении.
